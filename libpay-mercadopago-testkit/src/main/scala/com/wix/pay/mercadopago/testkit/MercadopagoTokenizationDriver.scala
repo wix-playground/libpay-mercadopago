@@ -1,8 +1,9 @@
 package com.wix.pay.mercadopago.testkit
 
 import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe
+import com.wix.pay.creditcard.CreditCard
 import com.wix.pay.mercadopago.model._
-import com.wix.pay.mercadopago.{ErrorResponseParser, TokenizeRequestParser, TokenizeResponseParser}
+import com.wix.pay.mercadopago.{ErrorResponseParser, MercadopagoHelper, TokenizeRequestParser, TokenizeResponseParser}
 import spray.http._
 
 class MercadopagoTokenizationDriver(port: Int) {
@@ -12,24 +13,63 @@ class MercadopagoTokenizationDriver(port: Int) {
   private val responseParser = new TokenizeResponseParser
   private val errorResponseParser = new ErrorResponseParser
 
-  def startProbe() {
+  def start() {
     probe.doStart()
   }
 
-  def stopProbe() {
+  def stop() {
     probe.doStop()
   }
 
-  def resetProbe() {
+  def reset() {
     probe.handlers.clear()
   }
 
-  def aRequestFor(request: TokenizeRequest): RequestCtx = {
-    new RequestCtx(request)
+  def aTokenizeFor(card: CreditCard, countryCode: String): RequestCtx = {
+    new RequestCtx(MercadopagoHelper.createTokenizeRequest(
+      creditCard = card,
+      countryCode = countryCode)
+    )
   }
 
   class RequestCtx(request: TokenizeRequest) {
-    def returns(response: TokenizeResponse) {
+    def returns(cardTokenId: String): Unit = {
+      returns(TokenizeResponse(
+        public_key = "some public key",
+        card_id = "some card ID",
+        luhn_validation = true,
+        status = "some status",
+        used_date = "some user date",
+        live_mode = true,
+        card_number_length = 16,
+        id = cardTokenId,
+        creation_date = "some creation date",
+        trunc_card_number = "1234",
+        security_code_length = Some(3),
+        expiration_year = 2020,
+        expiration_month = 12,
+        last_modified_date = "some last modified date",
+        cardholder = CardHolder(
+          name = "some cardholder name",
+          identification = Identification(
+            subtype = "some subtype",
+            number = "some number",
+            `type` = IdentificationTypes.cpf
+          )
+        ),
+        due_date = "some due date"
+      ))
+    }
+
+    def failsWith(errorMessage: String): Unit = {
+      errors(ErrorResponse(
+        error = "some error",
+        message = errorMessage,
+        cause = List()
+      ))
+    }
+
+    def returns(response: TokenizeResponse): Unit = {
       probe.handlers += {
         case HttpRequest(
         HttpMethods.POST,
@@ -43,7 +83,7 @@ class MercadopagoTokenizationDriver(port: Int) {
       }
     }
 
-    def errors(errorResponse: ErrorResponse) {
+    def errors(errorResponse: ErrorResponse): Unit = {
       probe.handlers += {
         case HttpRequest(
         HttpMethods.POST,

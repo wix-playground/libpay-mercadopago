@@ -5,7 +5,7 @@ import java.util.{List => JList}
 import com.google.api.client.http.UrlEncodedParser
 import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe
 import com.wix.pay.mercadopago.model.{OauthErrorResponse, OauthResponse}
-import com.wix.pay.mercadopago.{OauthErrorResponseParser, OauthResponseParser}
+import com.wix.pay.mercadopago.{MercadopagoHelper, OauthErrorResponseParser, OauthResponseParser}
 import spray.http._
 
 import scala.collection.JavaConversions._
@@ -17,24 +17,45 @@ class MercadopagoOauthDriver(port: Int) {
   private val responseParser = new OauthResponseParser
   private val errorResponseParser = new OauthErrorResponseParser
 
-  def startProbe() {
+  def start() {
     probe.doStart()
   }
 
-  def stopProbe() {
+  def stop() {
     probe.doStop()
   }
 
-  def resetProbe() {
+  def reset() {
     probe.handlers.clear()
   }
 
-  def aRequestFor(params: Map[String, String]): RequestCtx = {
-    new RequestCtx(params)
+  def aRequestFor(clientId: String, clientSecret: String): RequestCtx = {
+    new RequestCtx(MercadopagoHelper.createOauthRequest(
+      clientId = clientId,
+      clientSecret = clientSecret
+    ))
   }
 
   class RequestCtx(params: Map[String, String]) {
-    def returns(response: OauthResponse) {
+    def returns(accessToken: String): Unit = {
+      returns(OauthResponse(
+        access_token = accessToken,
+        token_type = "some token type",
+        expires_in = 1000,
+        scope = "some scope",
+        refresh_token = "some refresh token"
+      ))
+    }
+
+    def failsWith(errorMessage: String): Unit = {
+      errors(OauthErrorResponse(
+        message = errorMessage,
+        error = "some error",
+        status = 666
+      ))
+    }
+
+    def returns(response: OauthResponse): Unit = {
       probe.handlers += {
         case HttpRequest(
         HttpMethods.POST,
@@ -48,7 +69,7 @@ class MercadopagoOauthDriver(port: Int) {
       }
     }
 
-    def errors(errorResponse: OauthErrorResponse) {
+    def errors(errorResponse: OauthErrorResponse): Unit = {
       probe.handlers += {
         case HttpRequest(
         HttpMethods.POST,
