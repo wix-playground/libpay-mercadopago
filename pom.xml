@@ -13,7 +13,7 @@
         <groupId>com.wix.pay</groupId>
         <artifactId>libpay-mercadopago-parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-		<relativePath>libpay-mercadopago-parent</relativePath>
+        <relativePath>libpay-mercadopago-parent</relativePath>
     </parent>
 
 
