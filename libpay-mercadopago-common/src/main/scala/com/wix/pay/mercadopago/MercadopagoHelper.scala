@@ -53,19 +53,13 @@ object MercadopagoHelper {
   }
 
   def toPaymentMethodId(creditCard: CreditCard): Option[String] = {
-    PublicCreditCard(creditCard).network match {
-      case Some(network) => toPaymentMethodId(network)
-      case None => None
-    }
+    PublicCreditCard(creditCard).network.flatMap { networkPaymentMethodIds.get }
   }
 
-  private def toPaymentMethodId(network: String): Option[String] = {
-    network match {
-      case Networks.visa => Some(PaymentMethodIds.visa)
-      case Networks.masterCard => Some(PaymentMethodIds.mastercard)
-      case _ => None
-    }
-  }
+  private val networkPaymentMethodIds = Map(
+    Networks.visa -> PaymentMethodIds.visa,
+    Networks.masterCard -> PaymentMethodIds.mastercard
+  )
 
   private val countryIdentificationTypes = Map(
     "AR" -> IdentificationTypes.dni,
