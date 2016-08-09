@@ -21,4 +21,4 @@ case class CreatePaymentResponse(payment_id: String,
                                  payer_email: String,
                                  reason: String,
                                  card_token_id: String,
-                                 statement_descriptor: String)
+                                 statement_descriptor: Option[String])
