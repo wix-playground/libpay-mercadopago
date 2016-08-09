@@ -109,7 +109,7 @@ class MercadopagoPaymentsDriver(port: Int) {
         payer_email = customer.email.get,
         reason = "some reason",
         card_token_id = cardTokenId,
-        statement_descriptor = "some statement descriptor"
+        statement_descriptor = Some("some statement descriptor")
       ))
     }
 

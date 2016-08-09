@@ -33,7 +33,7 @@ class CreatePaymentResponseParserTest extends SpecWithJUnit {
       payer_email = "some payer email",
       reason = "some reason",
       card_token_id = "some card token ID",
-      statement_descriptor = "some statement descriptor"
+      statement_descriptor = Some("some statement descriptor")
     )
   }
 
