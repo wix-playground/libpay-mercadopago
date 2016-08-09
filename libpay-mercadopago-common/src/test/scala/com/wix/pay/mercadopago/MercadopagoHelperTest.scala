@@ -36,6 +36,11 @@ class MercadopagoHelperTest extends SpecWithJUnit {
 
       MercadopagoHelper.createTokenizeRequest(
         creditCard = card,
+        countryCode = "CL"
+      ).cardholder.identification.`type` must beEqualTo(IdentificationTypes.rut)
+
+      MercadopagoHelper.createTokenizeRequest(
+        creditCard = card,
         countryCode = "CO"
       ).cardholder.identification.`type` must beEqualTo(IdentificationTypes.cc)
 

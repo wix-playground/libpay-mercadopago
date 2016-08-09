@@ -64,6 +64,7 @@ object MercadopagoHelper {
   private val countryIdentificationTypes = Map(
     "AR" -> IdentificationTypes.dni,
     "BR" -> IdentificationTypes.cpf,
+    "CL" -> IdentificationTypes.rut,
     "CO" -> IdentificationTypes.cc,
     "MX" -> IdentificationTypes.rfc,
     "VE" -> IdentificationTypes.ci
