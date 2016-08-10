@@ -2,12 +2,13 @@ package com.wix.pay.mercadopago
 
 import com.google.api.client.http._
 import com.wix.pay.creditcard.CreditCard
-import com.wix.pay.mercadopago.model.{ErrorCodes, Errors, Statuses}
+import com.wix.pay.mercadopago.model.{ErrorCodes, ErrorResponse, Errors, Statuses}
 import com.wix.pay.model.{CurrencyAmount, Customer, Deal}
-import com.wix.pay.{PaymentErrorException, PaymentGateway, PaymentRejectedException}
+import com.wix.pay.{PaymentErrorException, PaymentException, PaymentGateway, PaymentRejectedException}
 
 import scala.concurrent.duration.Duration
 import scala.util.Try
+
 
 class MercadopagoGateway(requestFactory: HttpRequestFactory,
                          connectTimeout: Option[Duration] = None,
@@ -115,15 +116,11 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
         response.status match {
           case Statuses.approved => response.payment_id
           case Statuses.rejected => throw new PaymentRejectedException(response.status_detail)
-          case _ => throw new PaymentErrorException(response.status_detail)
+          case otherStatus => throw new PaymentErrorException(response.status_detail)
         }
       } else if (responseJson.length > 0) {
         val errorResponse = errorResponseParser.parse(responseJson)
-        if ((errorResponse.error == Errors.badRequest) && (errorResponse.cause.length == 1) && (errorResponse.cause.head.code == ErrorCodes.invalidCardNumberLength)) {
-          throw new PaymentRejectedException(errorResponse.toString)
-        } else {
-          throw new PaymentErrorException(errorResponse.toString)
-        }
+        throw MercadopagoGateway.translateError(errorResponse)
       } else {
         // MercadoPago sometimes returns an empty body, e.g. on 401 "No Autorizado".
         // According to their engineers, the merchant needs to fill the form "Eu quero ir para produção" located
@@ -146,14 +143,22 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
         response.id
       } else {
         val errorResponse = errorResponseParser.parse(responseJson)
-        throw new PaymentErrorException(errorResponse.toString)
+        throw MercadopagoGateway.translateError(errorResponse)
       }
     }
   }
-
-
 }
 
 object MercadopagoGateway {
   val ID = "com.mercadopago"
+
+  private def translateError(errorResponse: ErrorResponse): PaymentException = {
+    if ((errorResponse.error == Errors.badRequest) && (errorResponse.cause.length == 1) &&
+      ErrorCodes.paymentRejectedBadRequestErrorCodes.contains(errorResponse.cause.head.code)) {
+
+      new PaymentRejectedException(errorResponse.toString)
+    } else {
+      new PaymentErrorException(errorResponse.toString)
+    }
+  }
 }
