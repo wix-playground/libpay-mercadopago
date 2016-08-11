@@ -8,8 +8,6 @@ import org.specs2.specification.Scope
 
 class CreatePaymentRequestParserTest extends SpecWithJUnit {
   trait Ctx extends Scope {
-    val parser = new CreatePaymentRequestParser
-
     def beCreatePaymentRequest(amount: Matcher[Double] = AlwaysMatcher(),
                                card_token_id: Matcher[String] = AlwaysMatcher()): Matcher[CreatePaymentRequest] = {
       amount ^^ { (_: CreatePaymentRequest).amount aka "amount" } and
@@ -30,8 +28,8 @@ class CreatePaymentRequestParserTest extends SpecWithJUnit {
 
   "stringify and then parse" should {
     "yield an object similar to the original one" in new Ctx {
-      val str = parser.stringify(someCreatePaymentRequest)
-      parser.parse(str) must beCreatePaymentRequest(
+      val str = CreatePaymentRequestParser.stringify(someCreatePaymentRequest)
+      CreatePaymentRequestParser.parse(str) must beCreatePaymentRequest(
         amount = ===(someCreatePaymentRequest.amount),
         card_token_id = ===(someCreatePaymentRequest.card_token_id)
       )

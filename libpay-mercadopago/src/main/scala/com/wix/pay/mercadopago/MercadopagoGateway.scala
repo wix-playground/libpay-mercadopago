@@ -30,21 +30,15 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
     numberOfRetries = 3,
     oauthEndpointUrl)
 
-  private val tokenizeRequestParser = new TokenizeRequestParser
-  private val tokenizeResponseParser = new TokenizeResponseParser
-  private val errorResponseParser = new ErrorResponseParser
-  private val createPaymentRequestParser = new CreatePaymentRequestParser
-  private val createPaymentResponseParser = new CreatePaymentResponseParser
-
   override def authorize(merchantKey: String, creditCard: CreditCard, currencyAmount: CurrencyAmount, customer: Option[Customer], deal: Option[Deal]): Try[String] = {
     Try {
-      throw new PaymentErrorException("MercadoPago does not support two-step payments")
+      throw PaymentErrorException("MercadoPago does not support two-step payments")
     }
   }
 
   override def capture(merchantKey: String, authorizationKey: String, amount: Double): Try[String] = {
     Try {
-      throw new PaymentErrorException("MercadoPago does not support two-step payments")
+      throw PaymentErrorException("MercadoPago does not support two-step payments")
     }
   }
 
@@ -86,7 +80,7 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
 
   override def voidAuthorization(merchantKey: String, authorizationKey: String): Try[String] = {
     Try {
-      throw new PaymentErrorException("MercadoPago does not support two-step payments")
+      throw PaymentErrorException("MercadoPago does not support two-step payments")
     }
   }
 
@@ -107,25 +101,25 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
         customerEmail = customerEmail
       )
 
-      val requestJson = createPaymentRequestParser.stringify(request)
+      val requestJson = CreatePaymentRequestParser.stringify(request)
       val httpResponse = executeHttpPostRequest(paymentsEndpointUrl, accessToken, requestJson)
       val responseJson = extractResponseAndClose(httpResponse)
       if (httpResponse.isSuccessStatusCode) {
-        val response = createPaymentResponseParser.parse(responseJson)
+        val response = CreatePaymentResponseParser.parse(responseJson)
 
         response.status match {
           case Statuses.approved => response.payment_id
-          case Statuses.rejected => throw new PaymentRejectedException(response.status_detail)
-          case otherStatus => throw new PaymentErrorException(response.status_detail)
+          case Statuses.rejected => throw PaymentRejectedException(response.status_detail)
+          case otherStatus => throw PaymentErrorException(response.status_detail)
         }
       } else if (responseJson.length > 0) {
-        val errorResponse = errorResponseParser.parse(responseJson)
+        val errorResponse = ErrorResponseParser.parse(responseJson)
         throw MercadopagoGateway.translateError(errorResponse)
       } else {
         // MercadoPago sometimes returns an empty body, e.g. on 401 "No Autorizado".
         // According to their engineers, the merchant needs to fill the form "Eu quero ir para produção" located
         // at https://www.mercadopago.com/mlb/account/credentials
-        throw new PaymentErrorException(s"${httpResponse.getStatusCode}|${httpResponse.getStatusMessage}")
+        throw PaymentErrorException(s"${httpResponse.getStatusCode}|${httpResponse.getStatusMessage}")
       }
     }
   }
@@ -133,16 +127,16 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
   private def tokenize(accessToken: String, creditCard: CreditCard, countryCode: String): Try[String] = {
     Try {
       val request = MercadopagoHelper.createTokenizeRequest(creditCard = creditCard, countryCode = countryCode)
-      val requestJson = tokenizeRequestParser.stringify(request)
+      val requestJson = TokenizeRequestParser.stringify(request)
 
       val httpResponse = executeHttpPostRequest(tokenizationEndpointUrl, accessToken, requestJson)
 
       val responseJson = extractResponseAndClose(httpResponse)
       if (httpResponse.isSuccessStatusCode) {
-        val response = tokenizeResponseParser.parse(responseJson)
+        val response = TokenizeResponseParser.parse(responseJson)
         response.id
       } else {
-        val errorResponse = errorResponseParser.parse(responseJson)
+        val errorResponse = ErrorResponseParser.parse(responseJson)
         throw MercadopagoGateway.translateError(errorResponse)
       }
     }
@@ -156,9 +150,9 @@ object MercadopagoGateway {
     if ((errorResponse.error == Errors.badRequest) && (errorResponse.cause.length == 1) &&
       ErrorCodes.paymentRejectedBadRequestErrorCodes.contains(errorResponse.cause.head.code)) {
 
-      new PaymentRejectedException(errorResponse.toString)
+      PaymentRejectedException(errorResponse.toString)
     } else {
-      new PaymentErrorException(errorResponse.toString)
+      PaymentErrorException(errorResponse.toString)
     }
   }
 }

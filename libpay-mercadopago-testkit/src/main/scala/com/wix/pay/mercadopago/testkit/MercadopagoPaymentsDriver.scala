@@ -10,10 +10,6 @@ import spray.http._
 class MercadopagoPaymentsDriver(port: Int) {
   private val probe = new EmbeddedHttpProbe(port, EmbeddedHttpProbe.NotFoundHandler)
 
-  private val requestParser = new CreatePaymentRequestParser
-  private val responseParser = new CreatePaymentResponseParser
-  private val errorResponseParser = new ErrorResponseParser
-
   def start() {
     probe.doStart()
   }
@@ -123,7 +119,7 @@ class MercadopagoPaymentsDriver(port: Int) {
         _) if isStubbedRequest(entity) =>
           HttpResponse(
             status = StatusCodes.OK,
-            entity = HttpEntity(ContentTypes.`application/json`, responseParser.stringify(response)))
+            entity = HttpEntity(ContentTypes.`application/json`, CreatePaymentResponseParser.stringify(response)))
       }
     }
 
@@ -137,7 +133,7 @@ class MercadopagoPaymentsDriver(port: Int) {
         _) if isStubbedRequest(entity) =>
           HttpResponse(
             status = StatusCodes.Forbidden,
-            entity = HttpEntity(ContentTypes.`application/json`, errorResponseParser.stringify(errorResponse)))
+            entity = HttpEntity(ContentTypes.`application/json`, ErrorResponseParser.stringify(errorResponse)))
       }
     }
 
@@ -156,7 +152,7 @@ class MercadopagoPaymentsDriver(port: Int) {
     }
 
     private def isStubbedRequest(entity: HttpEntity): Boolean = {
-      val parsedRequest = requestParser.parse(entity.asString)
+      val parsedRequest = CreatePaymentRequestParser.parse(entity.asString)
       parsedRequest == request
     }
   }

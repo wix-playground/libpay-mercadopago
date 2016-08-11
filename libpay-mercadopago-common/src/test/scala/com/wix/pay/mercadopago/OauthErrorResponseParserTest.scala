@@ -8,8 +8,6 @@ import org.specs2.specification.Scope
 
 class OauthErrorResponseParserTest extends SpecWithJUnit {
   trait Ctx extends Scope {
-    val parser = new OauthErrorResponseParser
-
     def beOauthErrorResponse(message: Matcher[String] = AlwaysMatcher(),
                              error: Matcher[String] = AlwaysMatcher(),
                              status: Matcher[Int] = AlwaysMatcher()): Matcher[OauthErrorResponse] = {
@@ -27,8 +25,8 @@ class OauthErrorResponseParserTest extends SpecWithJUnit {
 
   "stringify and then parse" should {
     "yield an object similar to the original one" in new Ctx {
-      val str = parser.stringify(someOauthErrorResponse)
-      parser.parse(str) must beOauthErrorResponse(
+      val str = OauthErrorResponseParser.stringify(someOauthErrorResponse)
+      OauthErrorResponseParser.parse(str) must beOauthErrorResponse(
         message = ===(someOauthErrorResponse.message),
         error = ===(someOauthErrorResponse.error),
         status = ===(someOauthErrorResponse.status)

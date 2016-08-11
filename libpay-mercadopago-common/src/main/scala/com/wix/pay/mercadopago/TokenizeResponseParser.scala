@@ -4,7 +4,7 @@ import com.wix.pay.mercadopago.model.TokenizeResponse
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization
 
-class TokenizeResponseParser() {
+object TokenizeResponseParser {
   private implicit val formats = DefaultFormats
 
   def parse(str: String): TokenizeResponse = {

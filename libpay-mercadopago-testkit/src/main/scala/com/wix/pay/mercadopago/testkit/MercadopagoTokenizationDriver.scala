@@ -9,10 +9,6 @@ import spray.http._
 class MercadopagoTokenizationDriver(port: Int) {
   private val probe = new EmbeddedHttpProbe(port, EmbeddedHttpProbe.NotFoundHandler)
 
-  private val requestParser = new TokenizeRequestParser
-  private val responseParser = new TokenizeResponseParser
-  private val errorResponseParser = new ErrorResponseParser
-
   def start() {
     probe.doStart()
   }
@@ -79,7 +75,7 @@ class MercadopagoTokenizationDriver(port: Int) {
         _) if isStubbedRequest(entity) =>
           HttpResponse(
             status = StatusCodes.OK,
-            entity = HttpEntity(ContentTypes.`application/json`, responseParser.stringify(response)))
+            entity = HttpEntity(ContentTypes.`application/json`, TokenizeResponseParser.stringify(response)))
       }
     }
 
@@ -93,12 +89,12 @@ class MercadopagoTokenizationDriver(port: Int) {
         _) if isStubbedRequest(entity) =>
           HttpResponse(
             status = StatusCodes.Forbidden,
-            entity = HttpEntity(ContentTypes.`application/json`, errorResponseParser.stringify(errorResponse)))
+            entity = HttpEntity(ContentTypes.`application/json`, ErrorResponseParser.stringify(errorResponse)))
       }
     }
 
     private def isStubbedRequest(entity: HttpEntity): Boolean = {
-      val parsedRequest = requestParser.parse(entity.asString)
+      val parsedRequest = TokenizeRequestParser.parse(entity.asString)
       parsedRequest == request
     }
   }

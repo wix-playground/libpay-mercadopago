@@ -6,8 +6,6 @@ import org.specs2.specification.Scope
 
 class TokenizeResponseParserTest extends SpecWithJUnit {
   trait Ctx extends Scope {
-    val parser = new TokenizeResponseParser
-
     val someTokenizeResponse = TokenizeResponse(
       public_key = "some public key",
       card_id = "some card ID",
@@ -37,8 +35,8 @@ class TokenizeResponseParserTest extends SpecWithJUnit {
 
   "stringify and then parse" should {
     "yield an object similar to the original one" in new Ctx {
-      val str = parser.stringify(someTokenizeResponse)
-      parser.parse(str) must beEqualTo(someTokenizeResponse)
+      val str = TokenizeResponseParser.stringify(someTokenizeResponse)
+      TokenizeResponseParser.parse(str) must beEqualTo(someTokenizeResponse)
     }
   }
 }

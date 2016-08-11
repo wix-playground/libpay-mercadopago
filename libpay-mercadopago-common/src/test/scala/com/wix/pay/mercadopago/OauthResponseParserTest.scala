@@ -8,8 +8,6 @@ import org.specs2.specification.Scope
 
 class OauthResponseParserTest extends SpecWithJUnit {
   trait Ctx extends Scope {
-    val parser = new OauthResponseParser
-
     def beOauthResponse(access_token: Matcher[String] = AlwaysMatcher(),
                         token_type: Matcher[String] = AlwaysMatcher(),
                         expires_in: Matcher[Long] = AlwaysMatcher(),
@@ -33,8 +31,8 @@ class OauthResponseParserTest extends SpecWithJUnit {
 
   "stringify and then parse" should {
     "yield an object similar to the original one" in new Ctx {
-      val str = parser.stringify(someOauthResponse)
-      parser.parse(str) must beOauthResponse(
+      val str = OauthResponseParser.stringify(someOauthResponse)
+      OauthResponseParser.parse(str) must beOauthResponse(
         access_token = ===(someOauthResponse.access_token),
         token_type = ===(someOauthResponse.token_type),
         expires_in = ===(someOauthResponse.expires_in),

@@ -8,8 +8,6 @@ import org.specs2.specification.Scope
 
 class TokenizeRequestParserTest extends SpecWithJUnit {
   trait Ctx extends Scope {
-    val parser = new TokenizeRequestParser
-
     def beTokenizeRequest(card_number: Matcher[String] = AlwaysMatcher(),
                           security_code: Matcher[Option[String]] = AlwaysMatcher(),
                           expiration_month: Matcher[Int] = AlwaysMatcher(),
@@ -40,8 +38,8 @@ class TokenizeRequestParserTest extends SpecWithJUnit {
 
   "stringify and then parse" should {
     "yield an object similar to the original one" in new Ctx {
-      val str = parser.stringify(someTokenizeRequest)
-      parser.parse(str) must beTokenizeRequest(
+      val str = TokenizeRequestParser.stringify(someTokenizeRequest)
+      TokenizeRequestParser.parse(str) must beTokenizeRequest(
         card_number = ===(someTokenizeRequest.card_number),
         security_code = ===(someTokenizeRequest.security_code),
         expiration_month = ===(someTokenizeRequest.expiration_month),

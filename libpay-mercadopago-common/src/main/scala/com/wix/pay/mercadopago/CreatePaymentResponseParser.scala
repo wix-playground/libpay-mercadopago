@@ -4,7 +4,7 @@ import com.wix.pay.mercadopago.model.CreatePaymentResponse
 import org.json4s.DefaultFormats
 import org.json4s.native.Serialization
 
-class CreatePaymentResponseParser() {
+object CreatePaymentResponseParser {
   private implicit val formats = DefaultFormats
 
   def parse(str: String): CreatePaymentResponse = {

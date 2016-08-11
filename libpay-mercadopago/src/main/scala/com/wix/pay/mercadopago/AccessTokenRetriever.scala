@@ -13,9 +13,6 @@ class AccessTokenRetriever(requestFactory: HttpRequestFactory,
                            numberOfRetries: Int = 0,
                            endpointUrl: String) {
   
-  private val responseParser = new OauthResponseParser
-  private val errorResponseParser = new OauthErrorResponseParser
-
   def retrieveAccessToken(clientId: String, clientSecret: String): Try[String] = {
     Try {
       val params = MercadopagoHelper.createOauthRequest(clientId, clientSecret)
@@ -34,11 +31,11 @@ class AccessTokenRetriever(requestFactory: HttpRequestFactory,
       val httpResponse = httpRequest.execute()
       val responseJson = extractResponseAndClose(httpResponse)
       if (httpResponse.isSuccessStatusCode) {
-        val oauthResponse = responseParser.parse(responseJson)
+        val oauthResponse = OauthResponseParser.parse(responseJson)
         oauthResponse.access_token
       } else {
-        val oauthErrorResponse = errorResponseParser.parse(responseJson)
-        throw new PaymentErrorException(oauthErrorResponse.message)
+        val oauthErrorResponse = OauthErrorResponseParser.parse(responseJson)
+        throw PaymentErrorException(oauthErrorResponse.message)
       }
     }
   }

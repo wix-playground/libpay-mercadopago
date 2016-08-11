@@ -8,8 +8,6 @@ import org.specs2.specification.Scope
 
 class ErrorResponseParserTest extends SpecWithJUnit {
   trait Ctx extends Scope {
-    val parser = new ErrorResponseParser
-
     def beErrorResponse(error: Matcher[String] = AlwaysMatcher(),
                         message: Matcher[String] = AlwaysMatcher(),
                         cause: Matcher[List[Error]] = AlwaysMatcher()): Matcher[ErrorResponse] = {
@@ -30,8 +28,8 @@ class ErrorResponseParserTest extends SpecWithJUnit {
 
   "stringify and then parse" should {
     "yield an object similar to the original one" in new Ctx {
-      val str = parser.stringify(someErrorResponse)
-      parser.parse(str) must beErrorResponse(
+      val str = ErrorResponseParser.stringify(someErrorResponse)
+      ErrorResponseParser.parse(str) must beErrorResponse(
         error = ===(someErrorResponse.error),
         message = ===(someErrorResponse.message),
         cause = ===(someErrorResponse.cause)

@@ -14,9 +14,6 @@ import scala.collection.mutable
 class MercadopagoOauthDriver(port: Int) {
   private val probe = new EmbeddedHttpProbe(port, EmbeddedHttpProbe.NotFoundHandler)
 
-  private val responseParser = new OauthResponseParser
-  private val errorResponseParser = new OauthErrorResponseParser
-
   def start() {
     probe.doStart()
   }
@@ -65,7 +62,7 @@ class MercadopagoOauthDriver(port: Int) {
         _) if isStubbedRequest(entity) =>
           HttpResponse(
             status = StatusCodes.OK,
-            entity = HttpEntity(ContentTypes.`application/json`, responseParser.stringify(response)))
+            entity = HttpEntity(ContentTypes.`application/json`, OauthResponseParser.stringify(response)))
       }
     }
 
@@ -79,7 +76,7 @@ class MercadopagoOauthDriver(port: Int) {
         _) if isStubbedRequest(entity) =>
           HttpResponse(
             status = StatusCodes.Forbidden,
-            entity = HttpEntity(ContentTypes.`application/json`, errorResponseParser.stringify(errorResponse)))
+            entity = HttpEntity(ContentTypes.`application/json`, OauthErrorResponseParser.stringify(errorResponse)))
       }
     }
 
