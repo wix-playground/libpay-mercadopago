@@ -15,10 +15,16 @@ object ErrorCodes {
     */
   val invalidParameterCardHolderIdentificationNumer = "324"
 
+  /**
+    * The customer can't be equal to the collector.
+    */
+  val customerCantBeEqualToCollector = "2060"
+
   /** Error codes that should be treated as if the payment was rejected. */
   val paymentRejectedBadRequestErrorCodes = Set(
     invalidCardNumberLength,
     cannotPayThisAmountWithThisPaymentMethodId,
-    invalidParameterCardHolderIdentificationNumer
+    invalidParameterCardHolderIdentificationNumer,
+    customerCantBeEqualToCollector
   )
 }
