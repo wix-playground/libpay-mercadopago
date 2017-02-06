@@ -3,7 +3,7 @@ package com.wix.pay.mercadopago
 import com.google.api.client.http._
 import com.wix.pay.creditcard.CreditCard
 import com.wix.pay.mercadopago.model.{ErrorCodes, ErrorResponse, Errors, Statuses}
-import com.wix.pay.model.{CurrencyAmount, Customer, Deal}
+import com.wix.pay.model.{CurrencyAmount, Customer, Deal, Payment}
 import com.wix.pay.{PaymentErrorException, PaymentException, PaymentGateway, PaymentRejectedException}
 
 import scala.concurrent.duration.Duration
@@ -30,7 +30,7 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
     numberOfRetries = 3,
     oauthEndpointUrl)
 
-  override def authorize(merchantKey: String, creditCard: CreditCard, currencyAmount: CurrencyAmount, customer: Option[Customer], deal: Option[Deal]): Try[String] = {
+  override def authorize(merchantKey: String, creditCard: CreditCard, payment: Payment, customer: Option[Customer], deal: Option[Deal]): Try[String] = {
     Try {
       throw PaymentErrorException("MercadoPago does not support two-step payments")
     }
@@ -42,13 +42,14 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
     }
   }
 
-  override def sale(merchantKey: String, creditCard: CreditCard, currencyAmount: CurrencyAmount, customer: Option[Customer], deal: Option[Deal]): Try[String] = {
+  override def sale(merchantKey: String, creditCard: CreditCard, payment: Payment, customer: Option[Customer], deal: Option[Deal]): Try[String] = {
     Try {
       require(deal.isDefined, "Deal is mandatory for MercadoPago")
       require(deal.get.title.isDefined, "Deal title is mandatory for MercadoPago")
       require(creditCard.holderName.isDefined, "Card holder name is mandatory for MercadoPago")
       require(creditCard.holderId.isDefined, "Card holder ID is mandatory for MercadoPago")
       require(creditCard.csc.isDefined, "CSC is mandatory for MercadoPago")
+      require(payment.installments == 1, "MercadoPago does not support installments")
 
       val merchant = merchantParser.parse(merchantKey)
 
@@ -65,7 +66,7 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
 
       createPayment(
         accessToken,
-        currencyAmount,
+        payment.currencyAmount,
         dealId = deal.get.id,
         dealTitle = deal.get.title.get,
         cardTokenId,

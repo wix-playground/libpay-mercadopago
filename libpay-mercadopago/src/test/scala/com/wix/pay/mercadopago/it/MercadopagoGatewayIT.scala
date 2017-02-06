@@ -4,7 +4,7 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.wix.pay.creditcard.{CreditCard, CreditCardOptionalFields, YearMonth}
 import com.wix.pay.mercadopago._
 import com.wix.pay.mercadopago.testkit.{MercadopagoOauthDriver, MercadopagoPaymentsDriver, MercadopagoTokenizationDriver}
-import com.wix.pay.model.{CurrencyAmount, Customer, Deal}
+import com.wix.pay.model.{CurrencyAmount, Customer, Deal, Payment}
 import com.wix.pay.{PaymentErrorException, PaymentGateway, PaymentRejectedException}
 import org.specs2.mutable.SpecWithJUnit
 import org.specs2.specification.Scope
@@ -58,6 +58,8 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       amount = 33.3
     )
 
+    val somePayment = Payment(someCurrencyAmount, 1)
+
     val someDeal = Deal(
       id = System.currentTimeMillis().toString,
       title = Some("some deal title"),
@@ -96,7 +98,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       mercadopago.sale(
         merchantKey = merchantKey,
         creditCard = someCreditCard,
-        currencyAmount = someCurrencyAmount,
+        payment = somePayment,
         customer = Some(someCustomer),
         deal = Some(someDeal)
       ) must beAFailedTry.like {
@@ -118,7 +120,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       mercadopago.sale(
         merchantKey = merchantKey,
         creditCard = someCreditCard,
-        currencyAmount = someCurrencyAmount,
+        payment = somePayment,
         customer = Some(someCustomer),
         deal = Some(someDeal)
       ) must beAFailedTry.like {
@@ -147,7 +149,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       mercadopago.sale(
         merchantKey = merchantKey,
         creditCard = someCreditCard,
-        currencyAmount = someCurrencyAmount,
+        payment = somePayment,
         customer = Some(someCustomer),
         deal = Some(someDeal)
       ) must beAFailedTry.like {
@@ -175,7 +177,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       mercadopago.sale(
         merchantKey = merchantKey,
         creditCard = someCreditCard,
-        currencyAmount = someCurrencyAmount,
+        payment = somePayment,
         customer = Some(someCustomer),
         deal = Some(someDeal)
       ) must beAFailedTry.like {
@@ -207,7 +209,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       mercadopago.sale(
         merchantKey = merchantKey,
         creditCard = someCreditCard,
-        currencyAmount = someCurrencyAmount,
+        payment = somePayment,
         customer = Some(someCustomer),
         deal = Some(someDeal)
       ) must beAFailedTry.like {
@@ -235,7 +237,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       mercadopago.sale(
         merchantKey = merchantKey,
         creditCard = someCreditCard,
-        currencyAmount = someCurrencyAmount,
+        payment = somePayment,
         customer = Some(someCustomer),
         deal = Some(someDeal)
       ) must beAFailedTry(
@@ -263,7 +265,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       mercadopago.sale(
         merchantKey = merchantKey,
         creditCard = someCreditCard,
-        currencyAmount = someCurrencyAmount,
+        payment = somePayment,
         customer = Some(someCustomer),
         deal = Some(someDeal)
       ) must beASuccessfulTry(
