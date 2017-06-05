@@ -71,7 +71,8 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
         dealTitle = deal.get.title.get,
         cardTokenId,
         paymentMethodId = MercadopagoHelper.toPaymentMethodId(creditCard),
-        customerEmail = getMail(customer)
+        customerEmail = getMail(customer),
+        sponsorId = MercadopagoHelper.getSponsorId(merchant.countryCode)
       ).get
     }
   }
@@ -91,7 +92,8 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
                             dealTitle: String,
                             cardTokenId: String,
                             paymentMethodId: Option[String],
-                            customerEmail: String): Try[String] = {
+                            customerEmail: String,
+                            sponsorId: Int): Try[String] = {
     Try {
       val request = MercadopagoHelper.createCreatePaymentRequest(
         currencyAmount = currencyAmount,
@@ -99,7 +101,8 @@ class MercadopagoGateway(requestFactory: HttpRequestFactory,
         dealTitle = dealTitle,
         cardTokenId = cardTokenId,
         paymentMethodId = paymentMethodId,
-        customerEmail = customerEmail
+        customerEmail = customerEmail,
+        sponsorId = sponsorId
       )
 
       val requestJson = CreatePaymentRequestParser.stringify(request)

@@ -39,7 +39,8 @@ object MercadopagoHelper {
                                  dealTitle: String,
                                  cardTokenId: String,
                                  paymentMethodId: Option[String],
-                                 customerEmail: String): CreatePaymentRequest = {
+                                 customerEmail: String,
+                                 sponsorId: Int): CreatePaymentRequest = {
     CreatePaymentRequest(
       amount = currencyAmount.amount,
       reason = dealTitle,
@@ -48,7 +49,8 @@ object MercadopagoHelper {
       payment_method_id = paymentMethodId,
       card_token_id = cardTokenId,
       payer_email = customerEmail,
-      external_reference = dealId
+      external_reference = dealId,
+      sponsor_id = sponsorId
     )
   }
 
@@ -69,4 +71,28 @@ object MercadopagoHelper {
     "MX" -> IdentificationTypes.rfc,
     "VE" -> IdentificationTypes.ci
   )
+
+  private val argentinaCode = 249880066
+  private val brazilCode = 249882304
+  private val mexicoCode = 249886588
+  private val colombiaCode = 249886998
+  private val chileCode = 249886882
+  private val peruCode = 249887185
+  private val uruguayCode = 249883989
+  private val venezuelaCode = 249887375
+
+  private val countryCodeToSponsorCode = Map(
+    "AR" -> argentinaCode,
+    "BR" -> brazilCode,
+    "MX" -> mexicoCode,
+    "CO" -> colombiaCode,
+    "CL" -> chileCode,
+    "PE" -> peruCode,
+    "UY" -> uruguayCode,
+    "VE" -> venezuelaCode)
+
+  def getSponsorId(countryCode: String) = {
+    countryCodeToSponsorCode.get(countryCode).get
+  }
+
 }

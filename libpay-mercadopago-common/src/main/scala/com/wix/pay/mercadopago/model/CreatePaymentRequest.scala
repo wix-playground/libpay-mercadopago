@@ -8,4 +8,5 @@ case class CreatePaymentRequest(amount: Double,
                                 payment_method_id: Option[String] = None,
                                 card_token_id: String,
                                 payer_email: String,
-                                external_reference: String)
+                                external_reference: String,
+                                sponsor_id: Int)

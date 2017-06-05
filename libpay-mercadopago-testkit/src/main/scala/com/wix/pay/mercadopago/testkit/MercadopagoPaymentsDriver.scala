@@ -26,27 +26,31 @@ class MercadopagoPaymentsDriver(port: Int) {
                         cardTokenId: String,
                         currencyAmount: CurrencyAmount,
                         customer: Customer,
-                        deal: Deal): RequestCtx = {
+                        deal: Deal,
+                        sponsorId: Int): RequestCtx = {
     new RequestCtx(
       card = card,
       cardTokenId = cardTokenId,
       currencyAmount = currencyAmount,
       customer = customer,
-      deal = deal)
+      deal = deal,
+      sponsorId = sponsorId)
   }
 
   class RequestCtx(card: CreditCard,
                    cardTokenId: String,
                    currencyAmount: CurrencyAmount,
                    customer: Customer,
-                   deal: Deal) {
+                   deal: Deal,
+                   sponsorId: Int) {
     private val request = MercadopagoHelper.createCreatePaymentRequest(
       currencyAmount = currencyAmount,
       dealId = deal.id,
       dealTitle = deal.title.get,
       cardTokenId = cardTokenId,
       paymentMethodId = MercadopagoHelper.toPaymentMethodId(card),
-      customerEmail = customer.email.get
+      customerEmail = customer.email.get,
+      sponsorId = sponsorId
     )
 
     def returns(transactionId: String): Unit = {
