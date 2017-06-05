@@ -9,11 +9,9 @@ import org.specs2.specification.Scope
 class CreatePaymentRequestParserTest extends SpecWithJUnit {
   trait Ctx extends Scope {
     def beCreatePaymentRequest(amount: Matcher[Double] = AlwaysMatcher(),
-                               sponsor_id: Matcher[Int] = AlwaysMatcher(),
                                card_token_id: Matcher[String] = AlwaysMatcher()): Matcher[CreatePaymentRequest] = {
       amount ^^ { (_: CreatePaymentRequest).amount aka "amount" } and
-        sponsor_id ^^ { (_: CreatePaymentRequest).sponsor_id aka "sponsor_id" } and
-          card_token_id ^^ { (_: CreatePaymentRequest).card_token_id aka "card_token_id" }
+        card_token_id ^^ { (_: CreatePaymentRequest).card_token_id aka "card_token_id" }
     }
 
     val someCreatePaymentRequest = CreatePaymentRequest(
@@ -24,8 +22,7 @@ class CreatePaymentRequestParserTest extends SpecWithJUnit {
       payment_method_id = Some(PaymentMethodIds.visa),
       card_token_id = "some card token ID",
       payer_email = "some payer email",
-      external_reference = "some external reference",
-      sponsor_id = 123456789
+      external_reference = "some external reference"
     )
   }
 
@@ -34,7 +31,6 @@ class CreatePaymentRequestParserTest extends SpecWithJUnit {
       val str = CreatePaymentRequestParser.stringify(someCreatePaymentRequest)
       CreatePaymentRequestParser.parse(str) must beCreatePaymentRequest(
         amount = ===(someCreatePaymentRequest.amount),
-        sponsor_id = ===(someCreatePaymentRequest.sponsor_id),
         card_token_id = ===(someCreatePaymentRequest.card_token_id)
       )
     }

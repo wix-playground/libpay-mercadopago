@@ -1,42 +1,58 @@
 package com.wix.pay.mercadopago
 
-import org.specs2.mutable.Specification
+
+import com.wix.pay.creditcard.{CreditCard, CreditCardOptionalFields, YearMonth}
+import com.wix.pay.mercadopago.model.IdentificationTypes
+import org.specs2.mutable.SpecWithJUnit
 import org.specs2.specification.Scope
 
-class MercadopagoHelperTest extends Specification {
 
-  "sponsor id helper" should {
+class MercadopagoHelperTest extends SpecWithJUnit {
+  trait Ctx extends Scope {}
 
-    "get Argentina sponsor code" in new Scope {
-      MercadopagoHelper.getSponsorId("AR") must beEqualTo(249880066)
-    }
+  "createTokenizeRequest" should {
+    "use the given country's identification type" in new Ctx {
+      val card = CreditCard(
+        number = "4580458045804580",
+        expiration = YearMonth(
+          year = 2020,
+          month = 1
+        ),
+        additionalFields = Some(CreditCardOptionalFields.withFields(
+          holderName = Some("Test"),
+          holderId = Some("12345")
+        ))
+      )
 
-    "get Brazil sponsor code" in new Scope {
-      MercadopagoHelper.getSponsorId("BR") must beEqualTo(249882304)
-    }
+      MercadopagoHelper.createTokenizeRequest(
+        creditCard = card,
+        countryCode = "AR"
+      ).cardholder.identification.`type` must beEqualTo(IdentificationTypes.dni)
 
-    "get Mexico sponsor code" in new Scope {
-      MercadopagoHelper.getSponsorId("MX") must beEqualTo(249886588)
-    }
+      MercadopagoHelper.createTokenizeRequest(
+        creditCard = card,
+        countryCode = "BR"
+      ).cardholder.identification.`type` must beEqualTo(IdentificationTypes.cpf)
 
-    "get Colombia sponsor code" in new Scope {
-      MercadopagoHelper.getSponsorId("CO") must beEqualTo(249886998)
-    }
+      MercadopagoHelper.createTokenizeRequest(
+        creditCard = card,
+        countryCode = "CL"
+      ).cardholder.identification.`type` must beEqualTo(IdentificationTypes.rut)
 
-    "get Chile sponsor code" in new Scope {
-      MercadopagoHelper.getSponsorId("CL") must beEqualTo(249886882)
-    }
+      MercadopagoHelper.createTokenizeRequest(
+        creditCard = card,
+        countryCode = "CO"
+      ).cardholder.identification.`type` must beEqualTo(IdentificationTypes.cc)
 
-    "get Peru sponsor code" in new Scope {
-      MercadopagoHelper.getSponsorId("PE") must beEqualTo(249887185)
-    }
+      MercadopagoHelper.createTokenizeRequest(
+        creditCard = card,
+        countryCode = "MX"
+      ).cardholder.identification.`type` must beEqualTo(IdentificationTypes.rfc)
 
-    "get Uruguay sponsor code" in new Scope {
-      MercadopagoHelper.getSponsorId("UY") must beEqualTo(249883989)
-    }
-
-    "get Venezuela sponsor code" in new Scope {
-      MercadopagoHelper.getSponsorId("VE") must beEqualTo(249887375)
+      MercadopagoHelper.createTokenizeRequest(
+        creditCard = card,
+        countryCode = "VE"
+      ).cardholder.identification.`type` must beEqualTo(IdentificationTypes.ci)
     }
   }
 }

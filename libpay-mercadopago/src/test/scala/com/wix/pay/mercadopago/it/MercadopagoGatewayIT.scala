@@ -31,13 +31,12 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
     val merchantParser = new JsonMercadopagoMerchantParser()
     val authorizationParser = new JsonMercadopagoAuthorizationParser()
 
-    val brazilCountryCode = "BR"
+    val someCountryCode = "BR"
     val someMerchant = MercadopagoMerchant(
       clientId = "some client ID",
       clientSecret = "some client secret",
-      countryCode = brazilCountryCode
+      countryCode = someCountryCode
     )
-    val brazilSponsorId = 249882304
     val merchantKey = merchantParser.stringify(someMerchant)
 
     val someCreditCard = CreditCard(
@@ -115,7 +114,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       val errorMessage = "some error message"
       tokenizationDriver.aTokenizeFor(
         card = someCreditCard,
-        countryCode = brazilCountryCode
+        countryCode = someCountryCode
       ) failsWith errorMessage
 
       mercadopago.sale(
@@ -136,7 +135,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       ) returns someAccessToken
       tokenizationDriver.aTokenizeFor(
         card = someCreditCard,
-        countryCode = brazilCountryCode
+        countryCode = someCountryCode
       ) returns someCardTokenId
       val errorMessage = "some error message"
       paymentsDriver.aCreatePaymentFor(
@@ -144,8 +143,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
         cardTokenId = someCardTokenId,
         currencyAmount = someCurrencyAmount,
         customer = someCustomer,
-        deal = someDeal,
-        sponsorId = brazilSponsorId
+        deal = someDeal
       ) failsWith errorMessage
 
       mercadopago.sale(
@@ -166,15 +164,14 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       ) returns someAccessToken
       tokenizationDriver.aTokenizeFor(
         card = someCreditCard,
-        countryCode = brazilCountryCode
+        countryCode = someCountryCode
       ) returns someCardTokenId
       paymentsDriver.aCreatePaymentFor(
         card = someCreditCard,
         cardTokenId = someCardTokenId,
         currencyAmount = someCurrencyAmount,
         customer = someCustomer,
-        deal = someDeal,
-        sponsorId = brazilSponsorId
+        deal = someDeal
       ) failsUnauthorized()
 
       mercadopago.sale(
@@ -195,7 +192,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       ) returns someAccessToken
       tokenizationDriver.aTokenizeFor(
         card = someCreditCard,
-        countryCode = brazilCountryCode
+        countryCode = someCountryCode
       ) returns someCardTokenId
       val errorMessage = "some error message"
       paymentsDriver.aCreatePaymentFor(
@@ -203,8 +200,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
         cardTokenId = someCardTokenId,
         currencyAmount = someCurrencyAmount,
         customer = someCustomer,
-        deal = someDeal,
-        sponsorId = brazilSponsorId
+        deal = someDeal
       ) isRejected (
         transactionId = someTransactionId,
         message = errorMessage
@@ -228,15 +224,14 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       ) returns someAccessToken
       tokenizationDriver.aTokenizeFor(
         card = someCreditCard,
-        countryCode = brazilCountryCode
+        countryCode = someCountryCode
       ) returns someCardTokenId
       paymentsDriver.aCreatePaymentFor(
         card = someCreditCard,
         cardTokenId = someCardTokenId,
         currencyAmount = someCurrencyAmount,
         customer = someCustomer,
-        deal = someDeal,
-        sponsorId = brazilSponsorId
+        deal = someDeal
       ) failsOnInvalidCardNumberLength()
 
       mercadopago.sale(
@@ -257,15 +252,14 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
       ) returns someAccessToken
       tokenizationDriver.aTokenizeFor(
         card = someCreditCard,
-        countryCode = brazilCountryCode
+        countryCode = someCountryCode
       ) returns someCardTokenId
       paymentsDriver.aCreatePaymentFor(
         card = someCreditCard,
         cardTokenId = someCardTokenId,
         currencyAmount = someCurrencyAmount,
         customer = someCustomer,
-        deal = someDeal,
-        sponsorId = brazilSponsorId
+        deal = someDeal
       ) returns someTransactionId
 
       mercadopago.sale(
