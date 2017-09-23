@@ -4,6 +4,7 @@ import java.util.{List => JList}
 
 import com.google.api.client.http.UrlEncodedParser
 import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe
+import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe.NotFoundHandler
 import com.wix.pay.mercadopago.model.{OauthErrorResponse, OauthResponse}
 import com.wix.pay.mercadopago.{MercadopagoHelper, OauthErrorResponseParser, OauthResponseParser}
 import spray.http._
@@ -11,8 +12,8 @@ import spray.http._
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 
-class MercadopagoOauthDriver(port: Int) {
-  private val probe = new EmbeddedHttpProbe(port, EmbeddedHttpProbe.NotFoundHandler)
+class MercadopagoOauthDriver(probe: EmbeddedHttpProbe) {
+  def this(port: Int) = this(new EmbeddedHttpProbe(port, NotFoundHandler))
 
   def start() {
     probe.doStart()
@@ -91,7 +92,7 @@ class MercadopagoOauthDriver(port: Int) {
     private def urlDecode(str: String): Map[String, String] = {
       val params = mutable.LinkedHashMap[String, JList[String]]()
       UrlEncodedParser.parse(str, mutableMapAsJavaMap(params))
-      params.mapValues( _(0) ).toMap
+      params.mapValues(_ (0)).toMap
     }
   }
 }

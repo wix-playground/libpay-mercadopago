@@ -1,13 +1,14 @@
 package com.wix.pay.mercadopago.testkit
 
 import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe
+import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe.NotFoundHandler
 import com.wix.pay.creditcard.CreditCard
 import com.wix.pay.mercadopago.model._
 import com.wix.pay.mercadopago.{ErrorResponseParser, MercadopagoHelper, TokenizeRequestParser, TokenizeResponseParser}
 import spray.http._
 
-class MercadopagoTokenizationDriver(port: Int) {
-  private val probe = new EmbeddedHttpProbe(port, EmbeddedHttpProbe.NotFoundHandler)
+class MercadopagoTokenizationDriver(probe: EmbeddedHttpProbe) {
+  def this(port: Int) = this(new EmbeddedHttpProbe(port, NotFoundHandler))
 
   def start() {
     probe.doStart()

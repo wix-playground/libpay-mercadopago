@@ -1,14 +1,15 @@
 package com.wix.pay.mercadopago.testkit
 
 import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe
+import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe.NotFoundHandler
 import com.wix.pay.creditcard.CreditCard
 import com.wix.pay.mercadopago.model._
 import com.wix.pay.mercadopago.{CreatePaymentRequestParser, CreatePaymentResponseParser, ErrorResponseParser, MercadopagoHelper}
 import com.wix.pay.model.{CurrencyAmount, Customer, Deal}
 import spray.http._
 
-class MercadopagoPaymentsDriver(port: Int) {
-  private val probe = new EmbeddedHttpProbe(port, EmbeddedHttpProbe.NotFoundHandler)
+class MercadopagoPaymentsDriver(probe: EmbeddedHttpProbe) {
+  def this(port: Int) = this(new EmbeddedHttpProbe(port, NotFoundHandler))
 
   def start() {
     probe.doStart()
@@ -83,7 +84,6 @@ class MercadopagoPaymentsDriver(port: Int) {
         transactionId = transactionId
       )
     }
-
 
     def returns(status: String, statusDetail: String, transactionId: String): Unit = {
       returns(CreatePaymentResponse(
