@@ -11,8 +11,8 @@ import com.wix.pay.mercadopago.model._
 import com.wix.pay.mercadopago.{ErrorResponseParser, MercadopagoHelper, TokenizeRequestParser, TokenizeResponseParser}
 
 
-class MercadopagoTokenizationDriver(port: Int) {
-  private val server: StubWebServer = aStubWebServer.onPort(port).build
+class MercadopagoTokenizationDriver(server: StubWebServer) {
+  def this(port: Int) = this(aStubWebServer.onPort(port).build)
 
   def start(): Unit = server.start()
   def stop(): Unit = server.stop()

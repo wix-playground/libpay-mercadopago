@@ -14,8 +14,8 @@ import com.wix.pay.mercadopago.model.{OauthErrorResponse, OauthResponse}
 import com.wix.pay.mercadopago.{MercadopagoHelper, OauthErrorResponseParser, OauthResponseParser}
 
 
-class MercadopagoOauthDriver(port: Int) {
-  private val server: StubWebServer = aStubWebServer.onPort(port).build
+class MercadopagoOauthDriver(server: StubWebServer) {
+  def this(port: Int) = this(aStubWebServer.onPort(port).build)
 
   def start(): Unit = server.start()
   def stop(): Unit = server.stop()

@@ -12,8 +12,8 @@ import com.wix.pay.mercadopago.{CreatePaymentRequestParser, CreatePaymentRespons
 import com.wix.pay.model.{CurrencyAmount, Customer, Deal}
 
 
-class MercadopagoPaymentsDriver(port: Int) {
-  private val server: StubWebServer = aStubWebServer.onPort(port).build
+class MercadopagoPaymentsDriver(server: StubWebServer) {
+  def this(port: Int) = this(aStubWebServer.onPort(port).build)
 
   def start(): Unit = server.start()
   def stop(): Unit = server.stop()
