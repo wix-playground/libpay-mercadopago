@@ -1,27 +1,24 @@
 package com.wix.pay.mercadopago.testkit
 
-import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe
-import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe.NotFoundHandler
+
+import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model._
+import com.wix.e2e.http.api.StubWebServer
+import com.wix.e2e.http.client.extractors.HttpMessageExtractors._
+import com.wix.e2e.http.server.WebServerFactory.aStubWebServer
 import com.wix.pay.creditcard.CreditCard
 import com.wix.pay.mercadopago.model._
 import com.wix.pay.mercadopago.{CreatePaymentRequestParser, CreatePaymentResponseParser, ErrorResponseParser, MercadopagoHelper}
 import com.wix.pay.model.{CurrencyAmount, Customer, Deal}
-import spray.http._
 
-class MercadopagoPaymentsDriver(probe: EmbeddedHttpProbe) {
-  def this(port: Int) = this(new EmbeddedHttpProbe(port, NotFoundHandler))
 
-  def start() {
-    probe.doStart()
-  }
+class MercadopagoPaymentsDriver(port: Int) {
+  private val server: StubWebServer = aStubWebServer.onPort(port).build
 
-  def stop() {
-    probe.doStop()
-  }
+  def start(): Unit = server.start()
+  def stop(): Unit = server.stop()
+  def reset(): Unit = server.replaceWith()
 
-  def reset() {
-    probe.handlers.clear()
-  }
 
   def aCreatePaymentFor(card: CreditCard,
                         cardTokenId: String,
@@ -47,23 +44,20 @@ class MercadopagoPaymentsDriver(probe: EmbeddedHttpProbe) {
       dealTitle = deal.title.get,
       cardTokenId = cardTokenId,
       paymentMethodId = MercadopagoHelper.toPaymentMethodId(card),
-      customerEmail = customer.email.get
-    )
+      customerEmail = customer.email.get)
 
     def returns(transactionId: String): Unit = {
       returns(
         status = Statuses.approved,
         statusDetail = "some status detail",
-        transactionId = transactionId
-      )
+        transactionId = transactionId)
     }
 
     def failsWith(errorMessage: String): Unit = {
       errors(ErrorResponse(
         error = "some error",
         message = errorMessage,
-        cause = List()
-      ))
+        cause = List()))
     }
 
     def failsOnInvalidCardNumberLength(): Unit = {
@@ -72,17 +66,14 @@ class MercadopagoPaymentsDriver(probe: EmbeddedHttpProbe) {
         message = "Invalid card_number_length",
         cause = List(Error(
           code = ErrorCodes.invalidCardNumberLength,
-          description = "Invalid card_number_length"
-        ))
-      ))
+          description = "Invalid card_number_length"))))
     }
 
-    def isRejected(transactionId: String, message: String): Unit = {
+    def getsRejected(transactionId: String, message: String): Unit = {
       returns(
         status = Statuses.rejected,
         statusDetail = message,
-        transactionId = transactionId
-      )
+        transactionId = transactionId)
     }
 
     def returns(status: String, statusDetail: String, transactionId: String): Unit = {
@@ -105,54 +96,53 @@ class MercadopagoPaymentsDriver(probe: EmbeddedHttpProbe) {
         payer_email = customer.email.get,
         reason = "some reason",
         card_token_id = cardTokenId,
-        statement_descriptor = Some("some statement descriptor")
-      ))
+        statement_descriptor = Some("some statement descriptor")))
     }
 
     def returns(response: CreatePaymentResponse): Unit = {
-      probe.handlers += {
+      server.appendAll {
         case HttpRequest(
-        HttpMethods.POST,
-        Uri.Path("/"),
-        _,
-        entity,
-        _) if isStubbedRequest(entity) =>
-          HttpResponse(
-            status = StatusCodes.OK,
-            entity = HttpEntity(ContentTypes.`application/json`, CreatePaymentResponseParser.stringify(response)))
+          HttpMethods.POST,
+          Path("/"),
+          _,
+          entity,
+          _) if isStubbedRequest(entity) =>
+            HttpResponse(
+              status = StatusCodes.OK,
+              entity = HttpEntity(ContentTypes.`application/json`, CreatePaymentResponseParser.stringify(response)))
       }
     }
 
     def errors(errorResponse: ErrorResponse): Unit = {
-      probe.handlers += {
+      server.appendAll {
         case HttpRequest(
-        HttpMethods.POST,
-        Uri.Path("/"),
-        _,
-        entity,
-        _) if isStubbedRequest(entity) =>
-          HttpResponse(
-            status = StatusCodes.Forbidden,
-            entity = HttpEntity(ContentTypes.`application/json`, ErrorResponseParser.stringify(errorResponse)))
+          HttpMethods.POST,
+          Path("/"),
+          _,
+          entity,
+          _) if isStubbedRequest(entity) =>
+            HttpResponse(
+              status = StatusCodes.Forbidden,
+              entity = HttpEntity(ContentTypes.`application/json`, ErrorResponseParser.stringify(errorResponse)))
       }
     }
 
     def failsUnauthorized(): Unit = {
-      probe.handlers += {
+      server.appendAll {
         case HttpRequest(
-        HttpMethods.POST,
-        Uri.Path("/"),
-        _,
-        entity,
-        _) if isStubbedRequest(entity) =>
-          HttpResponse(
-            status = StatusCodes.Unauthorized,
-            entity = HttpEntity(ContentTypes.`application/json`, ""))
+          HttpMethods.POST,
+          Path("/"),
+          _,
+          entity,
+          _) if isStubbedRequest(entity) =>
+            HttpResponse(
+              status = StatusCodes.Unauthorized,
+              entity = HttpEntity(ContentTypes.`application/json`, ""))
       }
     }
 
     private def isStubbedRequest(entity: HttpEntity): Boolean = {
-      val parsedRequest = CreatePaymentRequestParser.parse(entity.asString)
+      val parsedRequest = CreatePaymentRequestParser.parse(entity.extractAsString)
       parsedRequest == request
     }
   }

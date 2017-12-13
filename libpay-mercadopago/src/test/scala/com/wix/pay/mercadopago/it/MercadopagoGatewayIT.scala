@@ -201,7 +201,7 @@ class MercadopagoGatewayIT extends SpecWithJUnit {
         currencyAmount = someCurrencyAmount,
         customer = someCustomer,
         deal = someDeal
-      ) isRejected (
+      ) getsRejected (
         transactionId = someTransactionId,
         message = errorMessage
       )

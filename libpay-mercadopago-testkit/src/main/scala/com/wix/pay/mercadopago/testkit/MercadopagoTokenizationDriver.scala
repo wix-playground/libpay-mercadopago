@@ -1,33 +1,30 @@
 package com.wix.pay.mercadopago.testkit
 
-import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe
-import com.wix.hoopoe.http.testkit.EmbeddedHttpProbe.NotFoundHandler
+
+import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model._
+import com.wix.e2e.http.api.StubWebServer
+import com.wix.e2e.http.client.extractors.HttpMessageExtractors._
+import com.wix.e2e.http.server.WebServerFactory.aStubWebServer
 import com.wix.pay.creditcard.CreditCard
 import com.wix.pay.mercadopago.model._
 import com.wix.pay.mercadopago.{ErrorResponseParser, MercadopagoHelper, TokenizeRequestParser, TokenizeResponseParser}
-import spray.http._
 
-class MercadopagoTokenizationDriver(probe: EmbeddedHttpProbe) {
-  def this(port: Int) = this(new EmbeddedHttpProbe(port, NotFoundHandler))
 
-  def start() {
-    probe.doStart()
-  }
+class MercadopagoTokenizationDriver(port: Int) {
+  private val server: StubWebServer = aStubWebServer.onPort(port).build
 
-  def stop() {
-    probe.doStop()
-  }
+  def start(): Unit = server.start()
+  def stop(): Unit = server.stop()
+  def reset(): Unit = server.replaceWith()
 
-  def reset() {
-    probe.handlers.clear()
-  }
 
   def aTokenizeFor(card: CreditCard, countryCode: String): RequestCtx = {
     new RequestCtx(MercadopagoHelper.createTokenizeRequest(
       creditCard = card,
-      countryCode = countryCode)
-    )
+      countryCode = countryCode))
   }
+
 
   class RequestCtx(request: TokenizeRequest) {
     def returns(cardTokenId: String): Unit = {
@@ -51,51 +48,47 @@ class MercadopagoTokenizationDriver(probe: EmbeddedHttpProbe) {
           identification = Identification(
             subtype = "some subtype",
             number = "some number",
-            `type` = IdentificationTypes.cpf
-          )
-        ),
-        due_date = "some due date"
-      ))
+            `type` = IdentificationTypes.cpf)),
+        due_date = "some due date"))
     }
 
     def failsWith(errorMessage: String): Unit = {
       errors(ErrorResponse(
         error = "some error",
         message = errorMessage,
-        cause = List()
-      ))
+        cause = List()))
     }
 
     def returns(response: TokenizeResponse): Unit = {
-      probe.handlers += {
+      server.appendAll {
         case HttpRequest(
-        HttpMethods.POST,
-        Uri.Path("/"),
-        _,
-        entity,
-        _) if isStubbedRequest(entity) =>
-          HttpResponse(
-            status = StatusCodes.OK,
-            entity = HttpEntity(ContentTypes.`application/json`, TokenizeResponseParser.stringify(response)))
+          HttpMethods.POST,
+          Path("/"),
+          _,
+          entity,
+          _) if isStubbedRequest(entity) =>
+            HttpResponse(
+              status = StatusCodes.OK,
+              entity = HttpEntity(ContentTypes.`application/json`, TokenizeResponseParser.stringify(response)))
       }
     }
 
     def errors(errorResponse: ErrorResponse): Unit = {
-      probe.handlers += {
+      server.appendAll {
         case HttpRequest(
-        HttpMethods.POST,
-        Uri.Path("/"),
-        _,
-        entity,
-        _) if isStubbedRequest(entity) =>
-          HttpResponse(
-            status = StatusCodes.Forbidden,
-            entity = HttpEntity(ContentTypes.`application/json`, ErrorResponseParser.stringify(errorResponse)))
+          HttpMethods.POST,
+          Path("/"),
+          _,
+          entity,
+          _) if isStubbedRequest(entity) =>
+            HttpResponse(
+              status = StatusCodes.Forbidden,
+              entity = HttpEntity(ContentTypes.`application/json`, ErrorResponseParser.stringify(errorResponse)))
       }
     }
 
     private def isStubbedRequest(entity: HttpEntity): Boolean = {
-      val parsedRequest = TokenizeRequestParser.parse(entity.asString)
+      val parsedRequest = TokenizeRequestParser.parse(entity.extractAsString)
       parsedRequest == request
     }
   }
