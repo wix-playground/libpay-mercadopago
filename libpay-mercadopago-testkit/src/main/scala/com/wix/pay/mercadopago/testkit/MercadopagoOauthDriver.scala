@@ -1,9 +1,8 @@
 package com.wix.pay.mercadopago.testkit
 
 
-import scala.collection.JavaConversions._
-import scala.collection.mutable
 import java.util.{List => JList}
+
 import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.model._
 import com.google.api.client.http.UrlEncodedParser
@@ -12,6 +11,9 @@ import com.wix.e2e.http.client.extractors.HttpMessageExtractors._
 import com.wix.e2e.http.server.WebServerFactory.aStubWebServer
 import com.wix.pay.mercadopago.model.{OauthErrorResponse, OauthResponse}
 import com.wix.pay.mercadopago.{MercadopagoHelper, OauthErrorResponseParser, OauthResponseParser}
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 
 class MercadopagoOauthDriver(server: StubWebServer) {
@@ -33,7 +35,7 @@ class MercadopagoOauthDriver(server: StubWebServer) {
       returns(OauthResponse(
         access_token = accessToken,
         token_type = "some token type",
-        expires_in = 1000,
+        expires_in = Some(1000),
         scope = "some scope",
         refresh_token = "some refresh token"))
     }

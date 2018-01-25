@@ -10,7 +10,7 @@ class OauthResponseParserTest extends SpecWithJUnit {
   trait Ctx extends Scope {
     def beOauthResponse(access_token: Matcher[String] = AlwaysMatcher(),
                         token_type: Matcher[String] = AlwaysMatcher(),
-                        expires_in: Matcher[Long] = AlwaysMatcher(),
+                        expires_in: Matcher[Option[Long]] = AlwaysMatcher(),
                         scope: Matcher[String] = AlwaysMatcher(),
                         refresh_token: Matcher[String] = AlwaysMatcher()): Matcher[OauthResponse] = {
       access_token ^^ { (_: OauthResponse).access_token aka "access_token" } and
@@ -23,7 +23,7 @@ class OauthResponseParserTest extends SpecWithJUnit {
     val someOauthResponse = OauthResponse(
       access_token = "some access token",
       token_type = "some token type",
-      expires_in = 1234,
+      expires_in = Some(1234),
       scope = "some scope",
       refresh_token = "some refresh token"
     )
