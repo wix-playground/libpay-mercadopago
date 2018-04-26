@@ -37,7 +37,7 @@ class MercadopagoOauthDriver(server: StubWebServer) {
         token_type = "some token type",
         expires_in = Some(1000),
         scope = "some scope",
-        refresh_token = "some refresh token"))
+        refresh_token = Some("some refresh token")))
     }
 
     def failsWith(errorMessage: String): Unit = {

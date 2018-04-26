@@ -12,7 +12,7 @@ class OauthResponseParserTest extends SpecWithJUnit {
                         token_type: Matcher[String] = AlwaysMatcher(),
                         expires_in: Matcher[Option[Long]] = AlwaysMatcher(),
                         scope: Matcher[String] = AlwaysMatcher(),
-                        refresh_token: Matcher[String] = AlwaysMatcher()): Matcher[OauthResponse] = {
+                        refresh_token: Matcher[Option[String]] = AlwaysMatcher()): Matcher[OauthResponse] = {
       access_token ^^ { (_: OauthResponse).access_token aka "access_token" } and
         token_type ^^ { (_: OauthResponse).token_type aka "token_type" } and
         expires_in ^^ { (_: OauthResponse).expires_in aka "expires_in" } and
@@ -25,7 +25,7 @@ class OauthResponseParserTest extends SpecWithJUnit {
       token_type = "some token type",
       expires_in = Some(1234),
       scope = "some scope",
-      refresh_token = "some refresh token"
+      refresh_token = Some("some refresh token")
     )
   }
 
