@@ -2,7 +2,7 @@ package com.wix.pay.mercadopago
 
 
 object OauthEndpoint {
-  val production = "https://api.mercadolibre.com/oauth/token"
+  val production = "https://api.mercadopago.com/oauth/token"
 }
 
 object TokenizationEndpoint {
