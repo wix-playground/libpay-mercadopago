@@ -28,28 +28,7 @@ class MercadopagoTokenizationDriver(server: StubWebServer) {
 
   class RequestCtx(request: TokenizeRequest) {
     def returns(cardTokenId: String): Unit = {
-      returns(TokenizeResponse(
-        public_key = "some public key",
-        card_id = "some card ID",
-        luhn_validation = true,
-        status = "some status",
-        used_date = "some user date",
-        live_mode = true,
-        card_number_length = 16,
-        id = cardTokenId,
-        creation_date = "some creation date",
-        trunc_card_number = "1234",
-        security_code_length = Some(3),
-        expiration_year = 2020,
-        expiration_month = 12,
-        last_modified_date = "some last modified date",
-        cardholder = CardHolder(
-          name = "some cardholder name",
-          identification = Identification(
-            subtype = "some subtype",
-            number = "some number",
-            `type` = IdentificationTypes.cpf)),
-        due_date = "some due date"))
+      returns(TokenizeResponse(id = cardTokenId))
     }
 
     def failsWith(errorMessage: String): Unit = {
